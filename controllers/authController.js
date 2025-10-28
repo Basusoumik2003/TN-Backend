@@ -8,13 +8,21 @@ exports.register = async (req, res) => {
   const { username, email, password, role } = req.body;
 
   try {
+    if (!username || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
     const userCheck = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
-    if (userCheck.rows.length > 0) return res.status(400).json({ message: "User exists" });
+    if (userCheck.rows.length > 0)
+      return res.status(400).json({ message: "User already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
 
     const roleRes = await pool.query("SELECT id FROM roles WHERE role_name=$1", [role.toUpperCase()]);
-    const roleId = roleRes.rows[0]?.id;
+    if (roleRes.rows.length === 0)
+      return res.status(400).json({ message: "Invalid role" });
+
+    const roleId = roleRes.rows[0].id;
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60000);
@@ -37,6 +45,7 @@ exports.register = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 exports.verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
