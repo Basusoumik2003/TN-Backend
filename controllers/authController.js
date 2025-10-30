@@ -1,11 +1,10 @@
-// ======================
-// 📦 IMPORTS
-// ======================
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 const generateUID = require("../utils/generateUID");
 const sendOTP = require("../utils/sendOTP");
+
 
 // ======================
 // 🧩 REGISTER USER
