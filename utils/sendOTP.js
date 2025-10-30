@@ -17,12 +17,11 @@ const sendOTP = async (email, otp) => {
     `;
 
     const response = await resend.emails.send({
-      from: process.env.FROM_EMAIL,
-      to: email,
-      subject: "Your OTP Code",
-      html: htmlContent,
-    });
-
+  from: "Soumik <onboarding@resend.dev>", // ✅ use this directly for testing
+  to: "soumikbasu2003@gmail.com",         // ✅ send only to your own email
+  subject: "Your OTP Code",
+  html: htmlContent,
+});
     console.log("✅ OTP sent successfully:", response);
   } catch (error) {
     console.error("❌ Failed to send OTP:", error);
