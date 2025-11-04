@@ -6,7 +6,7 @@ const app = express();
 
 // ✅ Allow requests from frontend
 app.use(cors({
-  origin: 'https://frontend-user-etef.onrender.com', // your React app URL
+  origin: 'https://www.gocarbonpositive.com', // your React app URL
   credentials: true, // if you use cookies
 }));
 
