@@ -3,18 +3,27 @@ require("dotenv").config();
 
 const isProduction = process.env.NODE_ENV === "production";
 
+// ✅ Choose between DATABASE_URL and individual credentials
+const connectionConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { require: true, rejectUnauthorized: false }, // Render requires SSL
+    }
+  : {
+      user: process.env.DB_USER,
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      password: process.env.DB_PASSWORD,
+      port: process.env.DB_PORT || 5432,
+      ssl: false, // local dev (no SSL)
+    };
+
+// ✅ Connection pool setup
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT || 5432,
-  max: 20, // max number of clients in the pool
+  ...connectionConfig,
+  max: 20, // max clients in pool
   idleTimeoutMillis: 30000, // close idle clients after 30s
   connectionTimeoutMillis: 2000, // return error after 2s if cannot connect
-  ssl: isProduction
-    ? { require: true, rejectUnauthorized: false } // ✅ Required by Render
-    : false, // ❌ Disable SSL locally
 });
 
 pool.on("connect", () => {
@@ -23,13 +32,12 @@ pool.on("connect", () => {
 
 pool.on("error", (err) => {
   console.error("❌ Unexpected database error:", err.message);
-  // Optional reconnect logic
   setTimeout(() => {
     console.log("♻️ Reconnecting to database...");
   }, 2000);
 });
 
-// Test connection once on startup
+// ✅ Test connection on startup
 pool.query("SELECT NOW()")
   .then((res) => console.log("🕐 DB time:", res.rows[0].now))
   .catch((err) => console.error("❌ PostgreSQL connection error:", err));
