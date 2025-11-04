@@ -47,13 +47,13 @@ exports.register = async (req, res) => {
 
     const userId = userRes.rows[0].id;
     const u_id = generateUID("USR", userId);
-    await pool.query("UPDATE users SET u_id=$1 WHERE id=$2", [u_id, userId]);
+    await pool.query("UPDATE usertable SET u_id=$1 WHERE id=$2", [u_id, userId]);
 
     // Send OTP
     try {
       await sendOTP(email, otp);
     } catch (mailErr) {
-      await pool.query("DELETE FROM users WHERE id=$1", [userId]);
+      await pool.query("DELETE FROM usertable WHERE id=$1", [userId]);
       return res.status(500).json({
         message: "Failed to send OTP. Check email configuration.",
         error: mailErr.message,
@@ -73,7 +73,7 @@ exports.verifyOTP = async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT u.*, r.role_name 
-       FROM users u 
+       FROM usertable u 
        LEFT JOIN roles r ON u.role_id = r.id 
        WHERE u.email=$1`,
       [email]
@@ -131,7 +131,7 @@ exports.login = async (req, res) => {
   try {
     const userRes = await pool.query(
       `SELECT u.*, r.role_name 
-       FROM users u 
+       FROM usertable u 
        LEFT JOIN roles r ON u.role_id = r.id 
        WHERE u.email = $1`,
       [email]
