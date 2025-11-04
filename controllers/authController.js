@@ -10,7 +10,7 @@ exports.register = async (req, res) => {
 
   try {
     // Check if user already exists
-    const userCheck = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
+    const userCheck = await pool.query("SELECT * FROM usertable WHERE email=$1", [email]);
     if (userCheck.rows.length > 0) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -39,7 +39,7 @@ exports.register = async (req, res) => {
 
     // Insert user
     const userRes = await pool.query(
-      `INSERT INTO users (username, email, password, role_id, otp_code, otp_expires_at, verified)
+      `INSERT INTO usertable (username, email, password, role_id, otp_code, otp_expires_at, verified)
        VALUES ($1, $2, $3, $4, $5, $6, false)
        RETURNING id, username, email`,
       [username, email, hashed, roleId, otp, expiresAt]
@@ -92,7 +92,7 @@ exports.verifyOTP = async (req, res) => {
 
     // Mark user as verified
     await pool.query(
-      "UPDATE users SET verified=true, otp_code=NULL, otp_expires_at=NULL WHERE email=$1",
+      "UPDATE usertable SET verified=true, otp_code=NULL, otp_expires_at=NULL WHERE email=$1",
       [email]
     );
 
